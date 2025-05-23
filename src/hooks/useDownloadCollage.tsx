@@ -1,7 +1,6 @@
-import { useRef } from "react";
-import type { ImageContext } from "../Context/ImageContext";
+import { useCallback } from "react";
 
-type Sticker = {
+export type Sticker = {
   id: string;
   imgSrc: string;
   x: number;
@@ -10,97 +9,126 @@ type Sticker = {
   height: number;
 };
 
+const LOCAL_STORAGE_KEY = "photoBoothImages";
+
+// Local storage helpers
+export const saveImagesToLocalStorage = (images: any[]) => {
+  try {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(images));
+  } catch (e) {
+    console.warn("Failed to save images to localStorage", e);
+  }
+};
+
+export const getImagesFromLocalStorage = (): any[] => {
+  try {
+    const data = localStorage.getItem(LOCAL_STORAGE_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch (e) {
+    console.warn("Failed to get images from localStorage", e);
+    return [];
+  }
+};
+
+export const clearStoredImages = () => {
+  try {
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
+  } catch (e) {
+    console.warn("Failed to clear images from localStorage", e);
+  }
+};
+
 export const useDownloadCollage = () => {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const preloadImage = (src: string): Promise<HTMLImageElement> =>
+    new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => resolve(img);
+      img.onerror = (e) => reject(e);
+      img.src = src;
+    });
 
-  const download = (
-    img: ImageContext[] | null,
-    col: number,
-    size: number,
-    padding: number,
-    color: string,
-    filter: string,
-    stickers: Sticker[] = [],
-    text: string = ""
-  ) => {
-    const canvas = canvasRef.current;
-    if (!canvas) throw new Error("Canvas not available");
+  const download = useCallback(
+    async (
+      data: { imgSrc: string; filter?: string }[],
+      layout: number[][],
+      imageSize: number,
+      padding: number,
+      bgColor: string,
+      filter: string,
+      stickers: Sticker[],
+      caption: string,
+      fontColor: string,
+      saveToStorage: boolean = false // New flag to optionally save to localStorage after download
+    ) => {
+      const rows = layout.length;
+      const maxCols = Math.max(...layout.map((row) => row.length));
+      const canvasWidth = maxCols * imageSize + (maxCols + 1) * padding;
+      const canvasHeight = rows * imageSize + (rows + 1) * padding + 30;
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) throw new Error("2D context not available");
+      const canvas = document.createElement("canvas");
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
 
-    if (!img || img.length === 0) {
-      throw new Error("No images");
-    }
+      ctx.fillStyle = bgColor;
+      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-    const rows = Math.ceil(img.length / col);
-    const canvasWidth = col * size + (col + 1) * padding;
-    const canvasHeight = rows * size + (rows + 1) * padding;
+      try {
+        // Calculate total images needed from layout (sum of 1's)
+        const totalImagesNeeded = layout.flat().reduce((a, b) => a + b, 0);
 
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
-
-    // Clear canvas and fill background
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-    ctx.fillStyle = color;
-    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-
-    ctx.filter = filter || "none";
-
-    // Helper to load an image from src and return a Promise<Image>
-    const loadImage = (src: string): Promise<HTMLImageElement> =>
-      new Promise((resolve, reject) => {
-        const image = new Image();
-        image.crossOrigin = "anonymous"; // if you use remote images and want to avoid CORS issues
-        image.onload = () => resolve(image);
-        image.onerror = reject;
-        image.src = src;
-      });
-
-    // Load all photos + stickers before drawing
-    Promise.all(
-      img.map((photo) => loadImage(photo.imgSrc))
-    )
-      .then((loadedPhotos) => {
-        // Draw photos on canvas
-        loadedPhotos.forEach((image, i) => {
-          const column = i % col;
-          const row = Math.floor(i / col);
-          const x = padding + column * (size + padding);
-          const y = padding + row * (size + padding);
-          ctx.drawImage(image, x, y, size, size);
-        });
-
-        // Now load stickers
-        return Promise.all(stickers.map((st) => loadImage(st.imgSrc)));
-      })
-      .then((loadedStickers) => {
-        // Draw stickers
-        loadedStickers.forEach((stickerImage, i) => {
-          const st = stickers[i];
-          ctx.drawImage(stickerImage, st.x, st.y, st.width, st.height);
-        });
-
-        // Draw text below the collage (adjust as needed)
-        ctx.fillStyle = "#000"; // text color
-        ctx.font = "24px sans-serif";
-        ctx.textAlign = "center";
-        ctx.fillText(
-          text,
-          canvas.width / 2,
-          canvas.height - 20 // 20px from bottom, adjust as you want
+        const images = await Promise.all(
+          data.slice(0, totalImagesNeeded).map((d) => preloadImage(d.imgSrc))
         );
 
-        // Finally trigger download
-        const link = document.createElement("a");
-        link.download = "collage.png";
-        link.href = canvas.toDataURL("image/png");
-        link.click();
-      })
-      .catch((err) => {
-        console.error("Error loading images:", err);
-      });
-  };
+        let imgIndex = 0;
+        for (let row = 0; row < rows; row++) {
+          for (let col = 0; col < layout[row].length; col++) {
+            if (layout[row][col] === 1 && imgIndex < images.length) {
+              const x = padding + col * (imageSize + padding);
+              const y = padding + row * (imageSize + padding);
 
-  return { canvasRef, download };
+              ctx.filter = data[imgIndex].filter || filter || "none";
+              ctx.drawImage(images[imgIndex], x, y, imageSize, imageSize);
+              imgIndex++;
+            }
+          }
+        }
+
+        // Draw stickers
+        for (const sticker of stickers) {
+          const stickerImg = await preloadImage(sticker.imgSrc);
+          ctx.filter = "none";
+          ctx.drawImage(stickerImg, sticker.x, sticker.y, sticker.width, sticker.height);
+        }
+
+        // Draw caption text
+        ctx.font = "16px sans-serif";
+        ctx.fillStyle = fontColor;
+        ctx.textAlign = "center";
+        ctx.fillText(caption, canvasWidth / 2, canvasHeight - 10);
+
+        // Convert canvas to image URL and trigger download
+        const url = canvas.toDataURL("image/png");
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "collage.png";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Optionally save images to localStorage if flagged
+        if (saveToStorage) {
+          saveImagesToLocalStorage(data);
+        }
+      } catch (e) {
+        console.error("Error downloading collage", e);
+      }
+    },
+    []
+  );
+
+  return { download, saveImagesToLocalStorage, getImagesFromLocalStorage, clearStoredImages };
 };

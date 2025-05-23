@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { WebcamCapture } from '../components/WebcamCapture'
 import Navigation from '../components/Navigation'
 function Booth() {

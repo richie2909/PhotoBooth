@@ -43,7 +43,7 @@ export const CapturedImageList: React.FC<CapturedImageListProps> = ({ data, onRe
         `}
       </style>
 
-      <div className="w-[90%] mx-auto lg:w-1/3 flex flex-row lg:flex-col lg:items-center mt-6 lg:mt-0">
+      <div className="w-full mx-auto lg:w-1/3 flex flex-row lg:flex-col lg:items-center mt-1 lg:mt-0">
         <div
           className={`flex items-center justify-start gap-3 w-full lg:max-w-[120px] ${
             count > maxVisible ? "overflow-x-auto custom-scrollbar" : "overflow-x-hidden"
