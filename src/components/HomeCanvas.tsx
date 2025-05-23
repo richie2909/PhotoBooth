@@ -1,4 +1,4 @@
-import React from 'react'
+
 import Navigation from "./Navigation"
 import Landing from './Landing'
 import Hero from './Hero'
