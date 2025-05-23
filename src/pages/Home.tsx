@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 
 import HomeCanvas from '../components/HomeCanvas';
 import SnapCharmText from '../components/SnapCharmText';
