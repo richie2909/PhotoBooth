@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import  { useEffect, useState } from 'react'
 import { RxHamburgerMenu } from "react-icons/rx";
 import gsap from 'gsap'
 import { Link } from 'react-router-dom';
