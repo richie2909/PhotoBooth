@@ -1,13 +1,14 @@
+import React from "react";
+import Navigation from "../components/Navigation";
+import { WebcamCapture } from '../components/WebcamCapture';
 
-import { WebcamCapture } from '../components/WebcamCapture'
-import Navigation from '../components/Navigation'
-function Booth() {
+const Booth = () => {
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50">
       <Navigation />
       <WebcamCapture />
     </div>
-  )
-}
+  );
+};
 
-export default Booth
+export default Booth;

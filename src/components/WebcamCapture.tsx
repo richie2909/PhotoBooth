@@ -36,7 +36,7 @@ export const WebcamCapture = () => {
       if (!img) return;
       const newImage = { imgSrc: img, dateCreated: new Date(), filter };
 
-      setImage(prev => {
+      setImage((prev: string | any[]) => {
         const copy = [...prev];
         if (index !== null) copy[index] = newImage;
         else if (prev.length < layoutImageCount) copy.push(newImage);
@@ -98,7 +98,7 @@ export const WebcamCapture = () => {
     const reader = new FileReader();
     reader.onload = () => {
       const newImage = { imgSrc: reader.result as string, dateCreated: new Date(), filter };
-      setImage(prev => {
+      setImage((prev: any) => {
         const copy = [...prev];
         if (copy.length < layoutImageCount) copy.push(newImage);
         else copy[layoutImageCount - 1] = newImage;
@@ -147,18 +147,84 @@ export const WebcamCapture = () => {
           </div>
       </div>
 
-      <div className="mt-6 w-full max-w-xl overflow-x-auto flex gap-4 p-2 border rounded custom-scrollbar">
-        {FilterPresets.map((p, i) => (
+      {/* Filter buttons with icons */}
+      <div className="w-full max-w-6xl mx-auto mt-4 px-2">
+        <style>
+          {`
+            .filter-scrollbar::-webkit-scrollbar {
+              height: 6px;
+              background: transparent;
+            }
+            .filter-scrollbar::-webkit-scrollbar-thumb {
+              background-color: #f472b6;
+              border-radius: 3px;
+            }
+            .filter-scrollbar {
+              scrollbar-width: thin;
+              scrollbar-color: #f472b6 transparent;
+            }
+          `}
+        </style>
+        <div className="flex overflow-x-auto gap-3 pb-2 filter-scrollbar">
+          {/* No Filter Option */}
           <button
-            key={i}
-            onClick={() => setFilter(p.cssFilter)}
-            className={`px-4 py-2 border rounded whitespace-nowrap text-sm ${
-              filter === p.cssFilter ? "bg-pink-100 border-pink-400" : "bg-white border-gray-300"
+            onClick={() => setFilter(null)}
+            className={`group relative flex-shrink-0 flex flex-col items-center p-2 rounded-xl transition-all duration-200 bg-white border ${
+              filter === null
+                ? 'border-pink-500 shadow-lg scale-[1.02]'
+                : 'border-gray-200 hover:border-pink-300 hover:shadow-md'
             }`}
+            type="button"
           >
-            {p.name}
+            <div className={`w-14 h-14 rounded-lg overflow-hidden transition-transform duration-200 bg-gray-50 flex items-center justify-center ${
+              filter === null ? 'ring-2 ring-pink-500' : 'group-hover:scale-105'
+            }`}>
+              <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <span className={`text-xs font-medium mt-1 transition-colors whitespace-nowrap ${
+              filter === null ? 'text-pink-600' : 'text-gray-600 group-hover:text-pink-500'
+            }`}>
+              No Filter
+            </span>
+            {filter === null && (
+              <div className="absolute top-1 right-1 w-2 h-2 bg-pink-500 rounded-full border-2 border-white shadow-sm" />
+            )}
           </button>
-        ))}
+
+          {FilterPresets.map((filterPreset) => (
+            <button
+              key={filterPreset.name}
+              onClick={() => setFilter(filterPreset.cssFilter)}
+              className={`group relative flex-shrink-0 flex flex-col items-center p-2 rounded-xl transition-all duration-200 bg-white border ${
+                filter === filterPreset.cssFilter
+                  ? 'border-pink-500 shadow-lg scale-[1.02]'
+                  : 'border-gray-200 hover:border-pink-300 hover:shadow-md'
+              }`}
+              type="button"
+            >
+              <div className={`w-14 h-14 rounded-lg overflow-hidden transition-transform duration-200 ${
+                filter === filterPreset.cssFilter ? 'ring-2 ring-pink-500' : 'group-hover:scale-105'
+              }`}>
+                <img
+                  src={filterPreset.icon}
+                  alt={filterPreset.name}
+                  className="w-full h-full object-cover"
+                  style={{ filter: filterPreset.cssFilter }}
+                />
+              </div>
+              <span className={`text-xs font-medium mt-1 transition-colors whitespace-nowrap ${
+                filter === filterPreset.cssFilter ? 'text-pink-600' : 'text-gray-600 group-hover:text-pink-500'
+              }`}>
+                {filterPreset.name}
+              </span>
+              {filter === filterPreset.cssFilter && (
+                <div className="absolute top-1 right-1 w-2 h-2 bg-pink-500 rounded-full border-2 border-white shadow-sm" />
+              )}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="mt-6 flex gap-4">
@@ -168,19 +234,13 @@ export const WebcamCapture = () => {
           </Link>
         ) : (
           <>
-            <button
-              onClick={() => startCapture(null)}
-              disabled={isCountingDown || isCapturingSequence}
-              className="px-6 py-2 bg-pink-600 text-white rounded disabled:opacity-50 hover:bg-pink-700"
-            >
-              {editIndex !== null && !isCapturingSequence ? "Retaking..." : "Capture Photo"}
-            </button>
+           
             <button
               onClick={captureAllPhotos}
               disabled={isCountingDown || isCapturingSequence}
               className="px-6 py-2 bg-pink-600 text-white rounded disabled:opacity-50 hover:bg-pink-700"
             >
-              {isCapturingSequence ? "Capturing All..." : "Capture All Photos"}
+              {isCapturingSequence ? "Taking Photos..." : "Capture Photo"}
             </button>
           </>
         )}

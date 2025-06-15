@@ -38,7 +38,7 @@ function Navigation() {
 
   return (
     <div  id='nav' className='flex w-[90%] relative z-50 h-20 bg-gray-500 mx-[5%] mt-2 rounded-3xl justify-between border-1  border-pink-300 shadow-md shadow-purple-500 '>
-        <h1 className='my-6 lg:mx-10 mx-5 text-pink-400 text-lg lg:text-xl ' style={{fontFamily : "pacifico"}}>SnapCharm</h1>
+        <Link to="/" className='my-6 lg:mx-10 mx-5 text-pink-400 text-lg lg:text-xl ' style={{fontFamily : "pacifico"}}>SnapCharm</Link>
 
         <button className='mx-5 my-6 lg:hidden focus:outline-0' onClick={() => showSideBar()} >
         <RxHamburgerMenu size={25} className='text-pink-400 hover:text-blue-300 focus:text-blue-300'/>
