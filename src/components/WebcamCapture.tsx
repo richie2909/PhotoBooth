@@ -18,7 +18,7 @@ export const WebcamCapture = () => {
   const [filter, setFilter] = useState<string | null>(null);
   const [timer, setTimer] = useState(0);
   const [isCountingDown, setIsCountingDown] = useState(false);
-  const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [, setEditIndex] = useState<number | null>(null);
   const [isCapturingSequence, setIsCapturingSequence] = useState(false);
 
   const webcamRef = useRef<Webcam | null>(null);

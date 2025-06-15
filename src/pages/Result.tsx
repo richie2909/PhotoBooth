@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { imageContext } from "../Context/ImageContext";
-import type { ImageData } from "../Context/ImageContext";
+
 import { ChromePicker } from "react-color";
 import { layoutInfos } from "../components/layoutInfos";
-import { useDownloadCollage } from "../hooks/useDownloadCollage";
+
 import type { Sticker } from "../hooks/useDownloadCollage";
 
 import Navigation from "../components/Navigation";
@@ -28,7 +28,6 @@ const Result = () => {
   if (!data) throw new Error("No image data");
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { download } = useDownloadCollage();
 
   const [bgColor, setBgColor] = useState("#ffffff");
   const [fontColor, setFontColor] = useState("#333");
