@@ -47,7 +47,7 @@ const Result = () => {
   const [isMoving, setIsMoving] = useState(false);
   const [activeSticker, setActiveSticker] = useState<{ id: string; offsetX: number; offsetY: number } | null>(null);
   const [resizeStickerId, setResizeStickerId] = useState<string | null>(null);
-
+  console.log(resizeStickerId)
   // Optimize sticker movement with requestAnimationFrame
   const animationFrameRef = useRef<number | undefined>(undefined);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -68,7 +68,6 @@ const Result = () => {
       img.src = src;
     });
 
-  const isTouchDevice = typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
 
   // Add a ref for the controls area to help with outside click detection
   const controlsRef = useRef<HTMLDivElement>(null);
@@ -287,17 +286,17 @@ const Result = () => {
     };
   }, [resizeData]);
 
-  const onMouseDown = (e: React.MouseEvent<HTMLDivElement>, stickerId: string) => {
-    const target = e.currentTarget;
-    const rect = target.getBoundingClientRect();
-    const offsetX = e.clientX - rect.left;
-    const offsetY = e.clientY - rect.top;
+  // const onMouseDown = (e: React.MouseEvent<HTMLDivElement>, stickerId: string) => {
+  //   const target = e.currentTarget;
+  //   const rect = target.getBoundingClientRect();
+  //   const offsetX = e.clientX - rect.left;
+  //   const offsetY = e.clientY - rect.top;
 
-    setActiveSticker({ id: stickerId, offsetX, offsetY });
-    setIsMoving(true);
-    setSelectedStickerId(stickerId);
-    e.preventDefault();
-  };
+  //   setActiveSticker({ id: stickerId, offsetX, offsetY });
+  //   setIsMoving(true);
+  //   setSelectedStickerId(stickerId);
+  //   e.preventDefault();
+  // };
 
   const onStickerSelect = (e: React.MouseEvent | React.TouchEvent, stickerId: string) => {
     e.stopPropagation();
@@ -786,6 +785,7 @@ const Result = () => {
         </div>
       </div>
     </div>
+    
   );
 };
 
