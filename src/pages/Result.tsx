@@ -27,12 +27,11 @@ const Result = () => {
   const { data } = context;
   if (!data) throw new Error("No image data");
 
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
+  const canvasRef = useRef<HTMLCanvasElement>(null)/*  */;
   const [bgColor, setBgColor] = useState("#ffffff");
   const [fontColor, setFontColor] = useState("#333");
   const [filter] = useState("none");
-  const imageSize = 200; // Fixed size
+  const imageSize = 160; // Fixed size
   const [padding] = useState(10); 
 
   const [stickers, setStickers] = useState<Sticker[]>([]);
@@ -47,6 +46,7 @@ const Result = () => {
   } | null>(null);
   const [isMoving, setIsMoving] = useState(false);
   const [activeSticker, setActiveSticker] = useState<{ id: string; offsetX: number; offsetY: number } | null>(null);
+  const [resizeStickerId, setResizeStickerId] = useState<string | null>(null);
 
   // Optimize sticker movement with requestAnimationFrame
   const animationFrameRef = useRef<number | undefined>(undefined);
@@ -68,17 +68,31 @@ const Result = () => {
       img.src = src;
     });
 
+  const isTouchDevice = typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+
+  // Add a ref for the controls area to help with outside click detection
+  const controlsRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      const pickerElements = document.querySelectorAll(".chrome-picker");
-      const clickedInside = Array.from(pickerElements).some(el => el.contains(e.target as Node));
-      if (!clickedInside) {
-        setShowPicker(false);
-        setShowPicker1(false);
-      }
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+      // Ignore if clicking inside color pickers or controls
+      const pickerElements = document.querySelectorAll('.chrome-picker');
+      const clickedInsidePicker = Array.from(pickerElements).some(el => el.contains(e.target as Node));
+      if (clickedInsidePicker) return;
+      if (controlsRef.current && controlsRef.current.contains(e.target as Node)) return;
+      // Ignore if clicking a sticker
+      const stickerEls = document.querySelectorAll('.sticker-draggable');
+      const clickedSticker = Array.from(stickerEls).some(el => el.contains(e.target as Node));
+      if (clickedSticker) return;
+      setSelectedStickerId(null);
+      setResizeStickerId(null);
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
   }, []);
 
   // Render images + stickers on canvas
@@ -148,8 +162,7 @@ const Result = () => {
           const stickerImg = await preloadImage(sticker.imgSrc);
           ctx.filter = "none";
           ctx.drawImage(stickerImg, sticker.x, sticker.y, sticker.width, sticker.height);
-        }
-
+        } 
         // Draw caption with selected language
         ctx.font = "bold 16px sans-serif";
         ctx.fillStyle = fontColor;
@@ -164,7 +177,7 @@ const Result = () => {
 
   // Optimize sticker movement
   useEffect(() => {
-    if (!isMoving || !activeSticker || !containerRef.current) return;
+    if ((!isMoving && !resizeData) || !activeSticker) return;
 
     const handleMouseMove = (e: MouseEvent) => {
       if (animationFrameRef.current) {
@@ -286,6 +299,58 @@ const Result = () => {
     e.preventDefault();
   };
 
+  const onStickerSelect = (e: React.MouseEvent | React.TouchEvent, stickerId: string) => {
+    e.stopPropagation();
+    setSelectedStickerId(stickerId);
+    setResizeStickerId(null);
+    // Only start move if not on a handle
+    if ('button' in e && e.button !== 0) return;
+    if (e.target && (e.target as HTMLElement).classList.contains('resize-handle')) return;
+    // For move
+    if ('clientX' in e) {
+      const target = e.currentTarget as HTMLDivElement;
+      const rect = target.getBoundingClientRect();
+      const offsetX = e.clientX - rect.left;
+      const offsetY = e.clientY - rect.top;
+      setActiveSticker({ id: stickerId, offsetX, offsetY });
+      setIsMoving(true);
+    } else if ('touches' in e && e.touches.length === 1) {
+      const touch = e.touches[0];
+      const target = e.currentTarget as HTMLDivElement;
+      const rect = target.getBoundingClientRect();
+      const offsetX = touch.clientX - rect.left;
+      const offsetY = touch.clientY - rect.top;
+      setActiveSticker({ id: stickerId, offsetX, offsetY });
+      setIsMoving(true);
+    }
+  };
+
+  const onResizeHandleDown = (e: React.MouseEvent | React.TouchEvent, sticker: Sticker, pos: string) => {
+    e.stopPropagation();
+    setSelectedStickerId(sticker.id);
+    setResizeStickerId(sticker.id);
+    if ('clientX' in e) {
+      setResizeData({
+        id: sticker.id,
+        pos,
+        startX: e.clientX,
+        startY: e.clientY,
+        startWidth: sticker.width,
+        startHeight: sticker.height,
+      });
+    } else if ('touches' in e && e.touches.length === 1) {
+      const touch = e.touches[0];
+      setResizeData({
+        id: sticker.id,
+        pos,
+        startX: touch.clientX,
+        startY: touch.clientY,
+        startWidth: sticker.width,
+        startHeight: sticker.height,
+      });
+    }
+  };
+
   const handleDownload = async () => {
     try {
       if (!canvasRef.current) {
@@ -372,7 +437,7 @@ const Result = () => {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `snapcharm-collage-${new Date().getTime()}.png`;
+      link.download = `snapcharm-${new Date().getTime()}.png`;
       
       // Ensure the link is added to the document
       document.body.appendChild(link);
@@ -429,10 +494,11 @@ const Result = () => {
           }
         }
 
+        const newStickerId = Math.random().toString(36).substring(2, 9);
         setStickers((prev) => [
           ...prev,
           {
-            id: Math.random().toString(36).substring(2, 9),
+            id: newStickerId,
             imgSrc,
             x: 50,
             y: 50,
@@ -440,6 +506,8 @@ const Result = () => {
             height,
           },
         ]);
+        setSelectedStickerId(newStickerId);
+        setResizeStickerId(null);
       };
       img.src = imgSrc;
     };
@@ -465,7 +533,8 @@ const Result = () => {
                 {stickers.map((sticker) => (
                   <div
                     key={sticker.id}
-                    onMouseDown={(e) => onMouseDown(e, sticker.id)}
+                    onMouseDown={(e) => onStickerSelect(e, sticker.id)}
+                    onTouchStart={(e) => onStickerSelect(e, sticker.id)}
                     style={{
                       position: "absolute",
                       top: sticker.y,
@@ -511,18 +580,8 @@ const Result = () => {
                               ...(pos === "bottom-right" && { bottom: -6, right: -6 }),
                               zIndex: 15,
                             }}
-                            onMouseDown={(e) => {
-                              e.stopPropagation();
-                              setResizeData({
-                                id: sticker.id,
-                                pos,
-                                startX: e.clientX,
-                                startY: e.clientY,
-                                startWidth: sticker.width,
-                                startHeight: sticker.height
-                              });
-                              setSelectedStickerId(sticker.id);
-                            }}
+                            onMouseDown={(e) => onResizeHandleDown(e, sticker, pos)}
+                            onTouchStart={(e) => onResizeHandleDown(e, sticker, pos)}
                           />
                         ))}
                       </>
@@ -540,7 +599,7 @@ const Result = () => {
         </div>
 
         {/* Controls Section */}
-        <div className="w-full lg:w-1/3 space-y-6 bg-white p-6 rounded-xl shadow-lg">
+        <div ref={controlsRef} className="w-full lg:w-1/3 space-y-6 bg-white p-6 rounded-xl shadow-lg">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">Customize Your Photo</h2>
           
           {/* Language Selector */}

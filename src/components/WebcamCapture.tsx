@@ -86,7 +86,7 @@ export const WebcamCapture = () => {
         }, 1000);
       });
       await new Promise(r => setTimeout(r, 300));
-    }
+    /*  */}
 
     setEditIndex(null);
     setIsCapturingSequence(false);
@@ -119,7 +119,7 @@ export const WebcamCapture = () => {
         </label>
       </div>
 
-      <div className="flex relative flex-col lg:flex-row items-center w-full justify-center max-w-6xl gap-6">
+      <div className="flex relative flex-col lg:flex-row items-center lg:translate-x-20 w-full justify-center max-w-6xl gap-6">
         <div className="relative w-full lg:w-2/3 scale-x-[-1]">
           <Webcam
             mirrored={false}
@@ -141,8 +141,9 @@ export const WebcamCapture = () => {
 )}
 
         </div>
-          <div className="lg:absolute  lg:top-0 lg:translate-x-110 w-full 
-          ">
+<div className="lg:relative lg:w-1/4 w-full">
+ 
+        
                   <CapturedImageList data={data} onRetake={startCapture} />
           </div>
       </div>

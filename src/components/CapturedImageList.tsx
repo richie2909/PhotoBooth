@@ -43,38 +43,45 @@ export const CapturedImageList: React.FC<CapturedImageListProps> = ({ data, onRe
         `}
       </style>
 
-      <div className="w-full mx-auto lg:w-1/3 flex flex-row lg:flex-col lg:items-center mt-1 lg:mt-0">
-        <div
-          className={`flex items-center justify-start gap-3 w-full lg:max-w-[120px] ${
-            count > maxVisible ? "overflow-x-auto custom-scrollbar" : "overflow-x-hidden"
-          } flex-nowrap lg:flex-col`}
+      
+         <div className="w-full lg:w-1/2 px-5 bg-pink-100 border-pink-300 border-2 rounded-2xl py-2 flex flex-row lg:flex-col lg:items-center mt-1 lg:mt-0 lg:h-auto">
+  {count <= 0 ? (
+    <div className="w-full h-full flex items-center text-md justify-center px-20 py-10 text-pink-600 font-semibold">
+      No images captured yet.   
+    </div>
+  ) : (
+    <div
+      className={`flex items-center justify-start gap-3 w-full lg:max-w-[120px] ${
+        count > maxVisible ? "ove rflow-x-auto custom-scrollbar" : "overflow-x-hidden"
+      } flex-nowrap lg:flex-col`}
+      style={{
+        maxHeight: "450px",
+        height: isLargeScreen ? "auto" : "120px",
+      }}
+    >
+      {data?.slice(0, 9).map((img, index) => (
+        <button
+          key={index}
+          className="aspect-square rounded-md border border-gray-300 overflow-hidden hover:ring-2 hover:ring-pink-400 transition flex-shrink-0"
           style={{
-            maxHeight: "450px",
-            // On small screens if scroll, limit height to keep UI tidy (image height + gap)
-            height: isLargeScreen ? "auto" : "120px",
+            flexBasis: isLargeScreen ? "100px" : `${100 / visibleCount}%`,
+            maxWidth: "120px",
+            minWidth: 0,
           }}
+          onClick={() => onRetake(index)}
         >
-          {data?.slice(0, 9).map((img, index) => (
-            <button
-              key={index}
-              className="aspect-square rounded-md border border-gray-300 overflow-hidden hover:ring-2 hover:ring-pink-400 transition flex-shrink-0"
-              style={{
-                flexBasis: isLargeScreen ? "100px" : `${100 / visibleCount}%`,
-                maxWidth: "120px",
-                minWidth: 0,
-              }}
-              onClick={() => onRetake(index)}
-            >
-              <img
-                src={img.imgSrc}
-                alt={`Captured ${index}`}
-                style={{ filter: img.filter ?? "none" }}
-                className="w-full h-full object-cover scale-x-[-1]"
-              />
-            </button>
-          ))}
-        </div>
-      </div>
+          <img
+            src={img.imgSrc}
+            alt={`Captured ${index}`}
+            style={{ filter: img.filter ?? "none" }}
+            className="w-full h-full object-cover scale-x-[-1]"
+          />
+        </button>
+      ))}
+    </div>
+  )}
+</div>
+ 
     </>
   );
 };
