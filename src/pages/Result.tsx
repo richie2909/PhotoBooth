@@ -1,13 +1,18 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
+import { handleStickerUpload } from "../utils/stickerHelpFunction";
 import { imageContext } from "../Context/ImageContext";
 
+import { onResizeHandleDown } from "../utils/stickerHelpFunction";
+import {onStickerSelect} from  "../utils/stickerHelpFunction"
 import { ChromePicker } from "react-color";
 import { layoutInfos } from "../components/layoutInfos";
 
 import type { Sticker } from "../hooks/useDownloadCollage";
 
 import Navigation from "../components/Navigation";
-import { Link } from "react-router-dom";
+import ActionButton from "../components/ActionButton";
+import StickerUpload from "../components/StickerUpload";
+import Caption from "../components/Caption";
 
 const predefinedColors = ["#ffffff", "#f8f8f8", "#ffcccc", "#ccffcc", "#ccccff"];
 
@@ -286,71 +291,7 @@ const Result = () => {
     };
   }, [resizeData]);
 
-  // const onMouseDown = (e: React.MouseEvent<HTMLDivElement>, stickerId: string) => {
-  //   const target = e.currentTarget;
-  //   const rect = target.getBoundingClientRect();
-  //   const offsetX = e.clientX - rect.left;
-  //   const offsetY = e.clientY - rect.top;
-
-  //   setActiveSticker({ id: stickerId, offsetX, offsetY });
-  //   setIsMoving(true);
-  //   setSelectedStickerId(stickerId);
-  //   e.preventDefault();
-  // };
-
-  const onStickerSelect = (e: React.MouseEvent | React.TouchEvent, stickerId: string) => {
-    e.stopPropagation();
-    setSelectedStickerId(stickerId);
-    setResizeStickerId(null);
-    // Only start move if not on a handle
-    if ('button' in e && e.button !== 0) return;
-    if (e.target && (e.target as HTMLElement).classList.contains('resize-handle')) return;
-    // For move
-    if ('clientX' in e) {
-      const target = e.currentTarget as HTMLDivElement;
-      const rect = target.getBoundingClientRect();
-      const offsetX = e.clientX - rect.left;
-      const offsetY = e.clientY - rect.top;
-      setActiveSticker({ id: stickerId, offsetX, offsetY });
-      setIsMoving(true);
-    } else if ('touches' in e && e.touches.length === 1) {
-      const touch = e.touches[0];
-      const target = e.currentTarget as HTMLDivElement;
-      const rect = target.getBoundingClientRect();
-      const offsetX = touch.clientX - rect.left;
-      const offsetY = touch.clientY - rect.top;
-      setActiveSticker({ id: stickerId, offsetX, offsetY });
-      setIsMoving(true);
-    }
-  };
-
-  const onResizeHandleDown = (e: React.MouseEvent | React.TouchEvent, sticker: Sticker, pos: string) => {
-    e.stopPropagation();
-    setSelectedStickerId(sticker.id);
-    setResizeStickerId(sticker.id);
-    if ('clientX' in e) {
-      setResizeData({
-        id: sticker.id,
-        pos,
-        startX: e.clientX,
-        startY: e.clientY,
-        startWidth: sticker.width,
-        startHeight: sticker.height,
-      });
-    } else if ('touches' in e && e.touches.length === 1) {
-      const touch = e.touches[0];
-      setResizeData({
-        id: sticker.id,
-        pos,
-        startX: touch.clientX,
-        startY: touch.clientY,
-        startWidth: sticker.width,
-        startHeight: sticker.height,
-      });
-    }
-  };
-
-  const handleDownload = async () => {
+    const handleDownload = async () => {
     try {
       if (!canvasRef.current) {
         throw new Error('Canvas not initialized');
@@ -455,64 +396,7 @@ const Result = () => {
   };
 
   // Improve sticker upload UI
-  const handleStickerUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (!event.target.files || event.target.files.length === 0) return;
-    const file = event.target.files[0];
-    
-    // Validate file type and size
-    if (!file.type.startsWith('image/')) {
-      alert('Please upload an image file');
-      return;
-    }
-    
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    if (file.size > maxSize) {
-      alert('File size should be less than 5MB');
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const imgSrc = ev.target?.result as string;
-      const img = new Image();
-      img.onload = () => {
-        // Calculate initial size maintaining aspect ratio
-        const maxSize = 150;
-        let width = img.width;
-        let height = img.height;
-        
-        if (width > height) {
-          if (width > maxSize) {
-            height = (height * maxSize) / width;
-            width = maxSize;
-          }
-        } else {
-          if (height > maxSize) {
-            width = (width * maxSize) / height;
-            height = maxSize;
-          }
-        }
-
-        const newStickerId = Math.random().toString(36).substring(2, 9);
-        setStickers((prev) => [
-          ...prev,
-          {
-            id: newStickerId,
-            imgSrc,
-            x: 50,
-            y: 50,
-            width,
-            height,
-          },
-        ]);
-        setSelectedStickerId(newStickerId);
-        setResizeStickerId(null);
-      };
-      img.src = imgSrc;
-    };
-    reader.readAsDataURL(file);
-    event.target.value = "";
-  };
+  
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -602,44 +486,8 @@ const Result = () => {
           <h2 className="text-2xl font-bold text-gray-800 mb-6">Customize Your Photo</h2>
           
           {/* Language Selector */}
-          <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-            <h4 className="font-semibold text-gray-700 mb-3">Caption Language</h4>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setSelectedLanguage('en')}
-                className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  selectedLanguage === 'en'
-                    ? 'bg-pink-500 text-white shadow-md'
-                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
-                }`}
-                type="button"
-              >
-                English
-              </button>
-              <button
-                onClick={() => setSelectedLanguage('ja')}
-                className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  selectedLanguage === 'ja'
-                    ? 'bg-pink-500 text-white shadow-md'
-                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
-                }`}
-                type="button"
-              >
-                日本語
-              </button>
-              <button
-                onClick={() => setSelectedLanguage('ko')}
-                className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  selectedLanguage === 'ko'
-                    ? 'bg-pink-500 text-white shadow-md'
-                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
-                }`}
-                type="button"
-              >
-                한국어
-              </button>
-            </div>
-          </div>
+          <Caption selectedLanguage={selectedLanguage } setSelectedLanguage={setSelectedLanguage}/>
+          
 
           {/* Color pickers */}
           <div className="space-y-6">
@@ -699,32 +547,8 @@ const Result = () => {
           </div>
 
           {/* Sticker upload section with improved UI */}
-          <div className="space-y-4">
-            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-              <h4 className="font-semibold text-gray-700 mb-3">Add Stickers</h4>
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <label className="flex-1">
-                    <div className="relative">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleStickerUpload}
-                        className="hidden"
-                        id="sticker-upload"
-                      />
-                      <div className="flex items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                        <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                        </svg>
-                        <span className="text-sm text-gray-600">Upload Sticker</span>
-                      </div>
-                    </div>
-                  </label>
-                </div>
-                <p className="text-xs text-gray-500">Supported formats: PNG, JPG, GIF (max 5MB)</p>
-              </div>
-            </div>
+          <StickerUpload handleStickerUpload={handleStickerUpload}/>
+          
 
             {/* Sticker gallery with improved UI */}
             {stickers.length > 0 && (
@@ -768,23 +592,9 @@ const Result = () => {
           </div>
 
           {/* Action buttons */}
-          <div className="flex gap-4 pt-4">
-            <Link
-              to="/booth"
-              className="flex-1 bg-pink-500 hover:bg-pink-600 transition text-white px-6 py-3 rounded-lg shadow-md hover:shadow-lg text-center font-semibold"
-            >
-              Take Photos Again
-            </Link>
-            <button
-              onClick={handleDownload}
-              className="flex-1 bg-indigo-600 hover:bg-indigo-700 transition text-white px-6 py-3 rounded-lg shadow-md hover:shadow-lg font-semibold"
-            >
-              Download Collage
-            </button>
-          </div>
+         <ActionButton handleDownload={handleDownload} ></ActionButton> 
         </div>
       </div>
-    </div>
     
   );
 };
