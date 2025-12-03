@@ -1,5 +1,11 @@
-
-export const onStickerSelect = (e: React.MouseEvent | React.TouchEvent, stickerId: string) => {
+import type { Sticker } from "../hooks/useDownloadCollage";
+export const onStickerSelect = (e: React.MouseEvent | React.TouchEvent,
+   stickerId: string 
+   ,setSelectedStickerId : (selectedSticker : string | null) => void ,
+    setResizeStickerId : (r :string | null) => void,
+    setActiveSticker : (data : {id : string, offsetX : number, offsetY: number}) => void,
+    setIsMoving : (value : boolean) => void
+  ) => {
 e.stopPropagation();
 setSelectedStickerId(stickerId);
 setResizeStickerId(null);
@@ -25,7 +31,19 @@ if ('clientX' in e) {
 }
 };
 
-export  const onResizeHandleDown = (e: React.MouseEvent | React.TouchEvent, sticker: Sticker, pos: string) => {
+export  const onResizeHandleDown = (e: React.MouseEvent | React.TouchEvent,
+   sticker: Sticker, pos: string,
+   setSelectedStickerId : (selectedSticker : string | null) => void ,
+    setResizeStickerId : (r : string | null) => void,
+    setResizeData : (data :{
+    id: string;
+    pos: string;
+    startX: number;
+    startY: number;
+    startWidth: number;
+    startHeight: number;
+  } | null) => void
+  ) => {
     e.stopPropagation();
     setSelectedStickerId(sticker.id);
     setResizeStickerId(sticker.id);
@@ -41,7 +59,7 @@ export  const onResizeHandleDown = (e: React.MouseEvent | React.TouchEvent, stic
     } else if ('touches' in e && e.touches.length === 1) {
       const touch = e.touches[0];
       setResizeData({
-        id: sticker.id,
+        id: sticker.id, 
         pos,
         startX: touch.clientX,
         startY: touch.clientY,
@@ -56,7 +74,13 @@ export  const onResizeHandleDown = (e: React.MouseEvent | React.TouchEvent, stic
 
 
 
-export const handleStickerUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+export const handleStickerUpload = (event: React.ChangeEvent<HTMLInputElement>
+     ,setSelectedStickerId : (selectedSticker : string | null) => void ,
+    setResizeStickerId : (r :string | null) => void,
+    setStickers : React.Dispatch<React.SetStateAction<Sticker[]>>
+  
+
+) => {
     if (!event.target.files || event.target.files.length === 0) return;
     const file = event.target.files[0];
     
@@ -114,32 +138,4 @@ export const handleStickerUpload = (event: React.ChangeEvent<HTMLInputElement>) 
     reader.readAsDataURL(file);
     event.target.value = "";
   };
-
-
-
-//filler function
-
-function setSelectedStickerId(stickerId: string) {
-  throw new Error("Function not implemented.");
-}
-
-function setResizeStickerId(arg0: null) {
-  throw new Error("Function not implemented.");
-}
-
-function setActiveSticker(arg0: { id: string; offsetX: number; offsetY: number; }) {
-  throw new Error("Function not implemented.");
-}
-
-function setIsMoving(arg0: boolean) {
-  throw new Error("Function not implemented.");
-}
-
-function setResizeData(arg0: { id: any; pos: string; startX: number; startY: number; startWidth: any; startHeight: any; }) {
-  throw new Error("Function not implemented.");
-}
-
-function setStickers(arg0: (prev: any) => any[]) {
-  throw new Error("Function not implemented.");
-}
 

@@ -4,7 +4,6 @@ import { imageContext } from "../Context/ImageContext";
 
 import { onResizeHandleDown } from "../utils/stickerHelpFunction";
 import {onStickerSelect} from  "../utils/stickerHelpFunction"
-import { ChromePicker } from "react-color";
 import { layoutInfos } from "../components/layoutInfos";
 
 import type { Sticker } from "../hooks/useDownloadCollage";
@@ -13,6 +12,7 @@ import Navigation from "../components/Navigation";
 import ActionButton from "../components/ActionButton";
 import StickerUpload from "../components/StickerUpload";
 import Caption from "../components/Caption";
+import BackgroundColorSelector from "../components/BackgroundColorSelector";
 
 const predefinedColors = ["#ffffff", "#f8f8f8", "#ffcccc", "#ccffcc", "#ccccff"];
 
@@ -416,8 +416,8 @@ const Result = () => {
                 {stickers.map((sticker) => (
                   <div
                     key={sticker.id}
-                    onMouseDown={(e) => onStickerSelect(e, sticker.id)}
-                    onTouchStart={(e) => onStickerSelect(e, sticker.id)}
+                    onMouseDown={(e) => onStickerSelect(e, sticker.id, setSelectedStickerId,setResizeStickerId,setActiveSticker,setIsMoving,)}
+                    onTouchStart={(e) => onStickerSelect(e, sticker.id,setSelectedStickerId,setResizeStickerId,setActiveSticker,setIsMoving,)}
                     style={{
                       position: "absolute",
                       top: sticker.y,
@@ -463,8 +463,8 @@ const Result = () => {
                               ...(pos === "bottom-right" && { bottom: -6, right: -6 }),
                               zIndex: 15,
                             }}
-                            onMouseDown={(e) => onResizeHandleDown(e, sticker, pos)}
-                            onTouchStart={(e) => onResizeHandleDown(e, sticker, pos)}
+                            onMouseDown={(e) => onResizeHandleDown(e, sticker, pos,setSelectedStickerId,setResizeStickerId,setResizeData,)}
+                            onTouchStart={(e) => onResizeHandleDown(e, sticker, pos,setSelectedStickerId,setResizeStickerId, setResizeData)}
                           />
                         ))}
                       </>
@@ -490,109 +490,32 @@ const Result = () => {
           
 
           {/* Color pickers */}
-          <div className="space-y-6">
-            <div>
-              <h4 className="font-semibold text-gray-700 mb-3">Background Color</h4>
-              <div className="flex flex-wrap gap-2 items-center">
-                {predefinedColors.map((color) => (
-                  <button
-                    key={color}
-                    className={`w-8 h-8 rounded-full border transition-all duration-200 hover:scale-110 ${
-                      bgColor === color ? "ring-2 ring-pink-500 scale-110" : ""
-                    }`}
-                    style={{ backgroundColor: color }}
-                    onClick={() => setBgColor(color)}
-                    type="button"
-                  />
-                ))}
-                <button
-                  onClick={() => setShowPicker1(!showPicker1)}
-                  className="w-8 h-8 rounded-full border bg-gradient-to-br from-pink-400 via-yellow-300 to-purple-400 hover:scale-110 transition-transform"
-                  type="button"
+                      <div>
+            <BackgroundColorSelector setBgColor={setBgColor}
+             setShowPicker1={setShowPicker1}
+              predefinedColors={predefinedColors}
+               showPicker1={showPicker1}
+                bgColor={bgColor}
+               fontColor={fontColor} 
+               setFontColor={setFontColor} 
+              showPicker={showPicker}
+               setShowPicker={setShowPicker} 
+                
                 />
-              </div>
-              {showPicker1 && (
-                <div className="absolute z-20 mt-2">
-                  <ChromePicker color={bgColor} onChange={(c) => setBgColor(c.hex)} disableAlpha />
-                </div>
-              )}
-            </div>
 
-            <div>
-              <h4 className="font-semibold text-gray-700 mb-3">Caption Color</h4>
-              <div className="flex flex-wrap gap-2 items-center">
-                {predefinedColors.map((color) => (
-                  <button
-                    key={color}
-                    className={`w-8 h-8 rounded-full border transition-all duration-200 hover:scale-110 ${
-                      fontColor === color ? "ring-2 ring-pink-500 scale-110" : ""
-                    }`}
-                    style={{ backgroundColor: color }}
-                    onClick={() => setFontColor(color)}
-                    type="button"
-                  />
-                ))}
-                <button
-                  onClick={() => setShowPicker(!showPicker)}
-                  className="w-8 h-8 rounded-full border bg-gradient-to-br from-pink-400 via-yellow-300 to-purple-400 hover:scale-110 transition-transform"
-                  type="button"
-                />
-              </div>
-              {showPicker && (
-                <div className="absolute z-20 mt-2">
-                  <ChromePicker color={fontColor} onChange={(c) => setFontColor(c.hex)} disableAlpha />
-                </div>
-              )}
-            </div>
-          </div>
 
-          {/* Sticker upload section with improved UI */}
-          <StickerUpload handleStickerUpload={handleStickerUpload}/>
+              
+            </div>
+          <StickerUpload handleStickerUpload={(e) => {
+            handleStickerUpload(e,setSelectedStickerId, setResizeStickerId,setStickers)
+          }} setSelectedStickerId={setResizeStickerId} selectedStickerId={selectedStickerId} 
+            setStickers={setStickers}
+            stickers={stickers}
+            
           
-
-            {/* Sticker gallery with improved UI */}
-            {stickers.length > 0 && (
-              <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <h4 className="font-semibold text-gray-700 mb-3">Your Stickers</h4>
-                <div className="grid grid-cols-4 gap-3 max-h-48 overflow-y-auto p-2">
-                  {stickers.map((sticker) => (
-                    <div
-                      key={sticker.id}
-                      className={`relative group aspect-square border rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-all ${
-                        selectedStickerId === sticker.id ? 'ring-2 ring-pink-500' : ''
-                      }`}
-                    >
-                      <img
-                        src={sticker.imgSrc}
-                        alt="sticker"
-                        className="w-full h-full object-contain p-1"
-                        onClick={() => setSelectedStickerId(sticker.id)}
-                        draggable={false}
-                      />
-                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity flex items-center justify-center opacity-0 group-hover:opacity-100">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setStickers((prev) => prev.filter((s) => s.id !== sticker.id));
-                            if (selectedStickerId === sticker.id) setSelectedStickerId(null);
-                          }}
-                          className="p-1 bg-white rounded-full shadow-lg hover:bg-red-50 transition-colors"
-                          type="button"
-                        >
-                          <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Action buttons */}
+          />
          <ActionButton handleDownload={handleDownload} ></ActionButton> 
+          </div>
         </div>
       </div>
     
