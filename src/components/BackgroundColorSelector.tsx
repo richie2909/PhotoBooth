@@ -17,15 +17,23 @@ interface backgroundColorSelector {
 
 
 export default function backgroundColorSelector({ setBgColor,setShowPicker,showPicker, setFontColor, bgColor,fontColor, showPicker1, setShowPicker1,predefinedColors}:backgroundColorSelector) {
-  useEffect(() => {
-
-  }, [])
-  
+ 
   const div = useRef<HTMLDivElement>(null)
   const LostFocus = (e : MouseEvent) => {
-   if(div.current && !div.current.contains(e.target as Node)) 
-  }
-    return <div  ref={div} className="space-y-6">
+   if(div.current && !div.current.contains(e.target as Node)) {}
+    setShowPicker(false) 
+    console.log("outsideClick")
+    setShowPicker1(false)
+    console.log("outsideClick")
+   }
+  useEffect(() => {
+    document.addEventListener("mouseup", LostFocus)
+    return () => {
+ document.removeEventListener("mouseup", LostFocus)
+    } 
+
+  }, [])
+    return <div  className="space-y-6">
             <div>
               <h4 className="font-semibold text-gray-700 mb-3">Background Color</h4>
               <div className="flex flex-wrap gap-2 items-center">
@@ -38,6 +46,7 @@ export default function backgroundColorSelector({ setBgColor,setShowPicker,showP
                     style={{ backgroundColor: color }}
                     onClick={() => setBgColor(color)}
                     type="button"
+                    
                   />
                 ))}
                 <button
@@ -47,7 +56,7 @@ export default function backgroundColorSelector({ setBgColor,setShowPicker,showP
                 />
               </div>
               {showPicker1 && (
-                <div className="absolute z-20 mt-2">
+                <div  ref={div} className="absolute z-20 mt-2">
                   <ChromePicker color={bgColor} onChange={(c) => setBgColor(c.hex)} disableAlpha />
                 </div>
               )}
@@ -73,7 +82,7 @@ export default function backgroundColorSelector({ setBgColor,setShowPicker,showP
                 />
               </div>
               {showPicker && (
-                <div className="absolute z-20 mt-2">
+                <div ref={div} className="absolute z-20 mt-2">
                   <ChromePicker color={fontColor} onChange={(c) => setFontColor(c.hex)} disableAlpha />
                 </div>
               )} 
