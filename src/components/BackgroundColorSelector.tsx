@@ -1,4 +1,6 @@
 import { ChromePicker } from "react-color";
+import { useEffect } from "react";
+import { useRef } from "react";
 
 interface backgroundColorSelector {
     setBgColor : (color : string) =>  void
@@ -15,7 +17,15 @@ interface backgroundColorSelector {
 
 
 export default function backgroundColorSelector({ setBgColor,setShowPicker,showPicker, setFontColor, bgColor,fontColor, showPicker1, setShowPicker1,predefinedColors}:backgroundColorSelector) {
-    return <div className="space-y-6">
+  useEffect(() => {
+
+  }, [])
+  
+  const div = useRef<HTMLDivElement>(null)
+  const LostFocus = (e : MouseEvent) => {
+   if(div.current && !div.current.contains(e.target as Node)) 
+  }
+    return <div  ref={div} className="space-y-6">
             <div>
               <h4 className="font-semibold text-gray-700 mb-3">Background Color</h4>
               <div className="flex flex-wrap gap-2 items-center">

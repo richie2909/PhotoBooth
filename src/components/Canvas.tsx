@@ -1,27 +1,27 @@
-import  { useContext, type RefObject, type SetStateAction} from "react"
+import  React, { useContext, type SetStateAction} from "react"
 import { imageContext } from "../Context/ImageContext"
 import type { Sticker } from "../hooks/useDownloadCollage"
 import { onStickerSelect, onResizeHandleDown } from "../utils/stickerHelpFunction"
 
 interface CanvasProp {
-    containerRef:  RefObject<HTMLDivElement>
-    canvasRef : RefObject<HTMLCanvasElement>
+    containerRef:  React.RefObject<HTMLDivElement | null>
+    canvasRef : React.RefObject<HTMLCanvasElement | null>
     bgColor : string
     stickers : Sticker[]
     isMoving : boolean
    selectedStickerId : string | null
    activeSticker : { id: string; offsetX: number; offsetY: number } | null
-   setResizeData : (d : {
+   setResizeData : React.Dispatch<SetStateAction<{
     id: string;
     pos: string;
     startX: number;
     startY: number;
     startWidth: number;
-    startHeight: number;} | null ) => null
+    startHeight: number;} | null>> 
    setSelectedStickerId: React.Dispatch<SetStateAction<string | null>>
    setResizeStickerId : React.Dispatch<SetStateAction<string | null>>
-    setActiveSticker : (d :{ id: string; offsetX: number; offsetY: number } | null) => void
-    setIsMoving : (b : boolean) => void
+    setActiveSticker : React.Dispatch<SetStateAction<{ id: string; offsetX: number; offsetY: number } | null>>  
+    setIsMoving : React.Dispatch<SetStateAction<boolean>>
    
 
 }
@@ -34,9 +34,9 @@ export default function Canvas({containerRef, bgColor, stickers,canvasRef,
     
     const {data} = context
     
-    return <div className="max-w-7xl mx-auto p-4 flex flex-col lg:flex-row justify-center items-start mt-5 gap-8">
+    return <div className="">
         {/* Canvas container with relative positioning to overlay stickers */}
-        <div className="w-full lg:w-2/3 flex justify-center">
+        <div >
           <div ref={containerRef} className="relative border border-gray-300 rounded-xl shadow-lg bg-white overflow-hidden max-w-2xl">
             {data && (
               <>
