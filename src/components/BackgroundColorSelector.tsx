@@ -27,9 +27,9 @@ export default function backgroundColorSelector({ setBgColor,setShowPicker,showP
     console.log("outsideClick")
    }
   useEffect(() => {
-    document.addEventListener("mouseup", LostFocus)
+    document.addEventListener("mousedown", LostFocus)
     return () => {
- document.removeEventListener("mouseup", LostFocus)
+ document.removeEventListener("mousedown", LostFocus)
     } 
 
   }, [])
