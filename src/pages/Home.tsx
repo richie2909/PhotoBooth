@@ -7,6 +7,7 @@ import SnapCharmText from '../components/SnapCharmText';
 
 export default function Home() {
   const [showIntro, setShowIntro] = useState(true);
+  //show only the intro for new user
 
   // Automatically hide intro after 2 seconds
   useEffect(() => {

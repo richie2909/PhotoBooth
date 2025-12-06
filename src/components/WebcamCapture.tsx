@@ -110,7 +110,7 @@ export const WebcamCapture = () => {
 
   return (
     <div className="flex flex-col items-center w-full p-4">
-      <div className="flex justify-center items-center gap-2 p-4 w-full max-w-2xl mx-auto flex-nowrap">
+      <div className="flex max-sm:flex-cols justify-center h items-center gap-2 p-4 w-full max-w-2xl mx-auto flex-nowrap">
         <TimerSelector selected={selectedTimer} onChange={setSelectedTimer} />
         <LayoutSelector selectedCount={layoutImageCount} onChange={setLayoutImageCount} />
         <label className="flex items-center px-2 py-2 bg-pink-200 rounded hover:bg-purple-300 cursor-pointer">

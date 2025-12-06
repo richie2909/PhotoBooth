@@ -1,5 +1,4 @@
 import Navigation from "./Navigation"
-import Landing from './Landing'
 import Hero from './Hero'
 
 function HomeCanvas() {
@@ -16,7 +15,6 @@ function HomeCanvas() {
         <main className="container mx-auto px-4 py-12 md:py-20">
           <Hero />
           <div className="mt-24">
-            <Landing />
           </div>
         </main>
       </div>

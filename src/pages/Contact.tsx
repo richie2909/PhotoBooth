@@ -1,6 +1,5 @@
 
 import { Link } from "react-router-dom";
-
 function Contact() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-200 via-pink-200 to-purple-200 p-8">

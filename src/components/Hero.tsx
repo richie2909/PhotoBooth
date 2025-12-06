@@ -8,7 +8,7 @@ function Hero() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
-      className="relative w-full max-w-7xl mx-auto"
+      className="relative w-full px-5 max-w-7xl mx-auto"
     >
       <div className="grid md:grid-cols-2 gap-12 items-center">
         {/* Left content */}
@@ -19,9 +19,9 @@ function Hero() {
           className="text-left space-y-8"
         >
           <div className="space-y-4">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-tight">
-              Capture the moment,{" "}
-              <span className="text-pink-500 text-shadow-pink-200 ">cherish the magic</span>
+            <h1 className="text-4xl md:text-2xl lg:text-6xl font-bold text-slate-900 leading-tight">
+            SnapCharm{" "}
+              <span className="text-pink-500 text-shadow-pink-200 ">Online PhotoBooth</span>
             </h1>
             <p className="text-lg md:text-xl text-slate-600 leading-relaxed max-w-xl">
               Professional photo booth experience with AI-powered filters, 
@@ -64,21 +64,7 @@ function Hero() {
     transition={{ duration: 0.8, delay: 0.4 }}
     className="relative"
   >
-    <div className="relative aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl border border-white/60">
-      {/* Soft gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-pink-200/30 to-purple-200/30 backdrop-blur-sm z-10"></div>
-
-      {/* Aesthetic preview image */}
-      <img 
-        src="https://images.unsplash.com/photo-1544717305-996b815c338c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-        alt="Photo Booth Preview" 
-        className="w-full h-full object-cover z-0"
-      />
-
-      {/* Soft floating decorations */}
-      <div className="absolute -top-5 -right-5 w-20 h-20 bg-pink-100 rounded-xl rotate-12 shadow-md z-20"></div>
-      <div className="absolute -bottom-5 -left-5 w-20 h-20 bg-purple-100 rounded-xl -rotate-12 shadow-md z-20"></div>
-    </div>
+    
   </motion.div>
   
       </div>

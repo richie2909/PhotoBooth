@@ -1,5 +1,6 @@
 import gsap from "gsap";
 import { useLayoutEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 
 interface Prop {
   show: boolean;
@@ -69,12 +70,12 @@ export const Sidebar = ({ show, item }: Prop) => {
     >
       <ul className="grid justify-center m-6 mx-4 grid-cols-1 text-purple-300 w-full">
         {item.map((it, i) => (
-          <li
+          <Link to={`/${it}`}
             key={i}
             className="hover:text-pink-400 hover:px-5 hover:mx-2 hover:bg-gray-600 hover:rounded-3xl transition-all duration-300 ease-in-out cursor-pointer my-4 p-1"
           >
             {it}
-          </li>
+          </Link>
         ))}
       </ul>
     </div>
