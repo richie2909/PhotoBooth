@@ -1,4 +1,4 @@
-import  { useEffect, useState } from 'react'
+import  { useEffect, useState, useRef } from 'react'
 import { RxHamburgerMenu } from "react-icons/rx";
 import gsap from 'gsap'
 import { Link } from 'react-router-dom';
@@ -6,8 +6,23 @@ import { Sidebar } from './Sidebar';
 
 
 function Navigation() {
+    const div = useRef<HTMLDivElement>(null)
 
     const [show, setShow] = useState<boolean>(false)
+    const LostFocus = (e : React.ChangeEvent<
+        HTMLDivElement>) => {
+        
+        if (div.current && !div.current.contains(e.target)) {
+            setShow(false)
+        }
+    }
+
+    // useEffect(() => {
+    //     // document.addEventListener('"mousedown"', LostFocus, true)
+
+    //     // return () => {
+    //     //     document.removeEventListener('"mousedown"', LostFocus, true)
+    //     // }
 
     const showSideBar = () => {
         
@@ -57,7 +72,7 @@ function Navigation() {
 
         <a  href="" className='my-5.5 hidden lg:flex hover:text-pink-400  cursor-pointer hover:border-pink-400   duration-500 ease-in-out mx-10 text-purple-300 border-1 border-purple-300 px-5 py-1 rounded-2xl pb-3 '>Download App </a>
      
-        <div className=' absolute top-0 right-0'  >
+        <div ref={div} className=' absolute top-0 right-0'  >
         <Sidebar item={items} show={show}/>
         </div>
         
